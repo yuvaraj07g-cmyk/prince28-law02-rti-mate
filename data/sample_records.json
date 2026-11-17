@@ -1,0 +1,48 @@
+
+[
+  {
+    "id": "001",
+    "decision_no": null,
+    "date": "2005-06-15",
+    "public_authority": "All public authorities in India",
+    "section_invoked": "Section 4",
+    "outcome": "Public authorities must maintain records and proactively disclose prescribed information to the public.",
+    "topic": "Proactive disclosure"
+  },
+  {
+    "id": "002",
+    "decision_no": null,
+    "date": "2005-06-15",
+    "public_authority": "Central and State Public Authorities",
+    "section_invoked": "Section 6",
+    "outcome": "Citizens can submit written or electronic RTI requests to the concerned public information officer without giving reasons.",
+    "topic": "RTI application procedure"
+  },
+  {
+    "id": "003",
+    "decision_no": null,
+    "date": "2005-06-15",
+    "public_authority": "Central and State Public Authorities",
+    "section_invoked": "Section 7",
+    "outcome": "Information requests must generally be decided within 30 days, with a 48-hour limit for matters concerning life or liberty.",
+    "topic": "Response time limit"
+  },
+  {
+    "id": "004",
+    "decision_no": null,
+    "date": "2005-06-15",
+    "public_authority": "Central and State Public Authorities",
+    "section_invoked": "Section 8",
+    "outcome": "Certain categories of information are exempt from disclosure under the Right to Information Act.",
+    "topic": "Exemptions from disclosure"
+  },
+  {
+    "id": "005",
+    "decision_no": null,
+    "date": "2005-06-15",
+    "public_authority": "Central and State Public Authorities",
+    "section_invoked": "Section 10",
+    "outcome": "Non-exempt portions of a record can be disclosed after separating exempt information.",
+    "topic": "Severability and partial disclosure"
+  }
+]
