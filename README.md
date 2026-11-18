@@ -49,3 +49,7 @@ Then open http://localhost:8000/docs
 uv run pytest
 uv run ruff check .
 ```
+
+PostgreSQL integration tests use a dedicated test database. Set `TEST_DATABASE_URL`,
+run `uv run alembic upgrade head` against that database, then run `uv run pytest`.
+Without `TEST_DATABASE_URL`, those three tests are reported as skipped.
