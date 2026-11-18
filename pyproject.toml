@@ -8,8 +8,11 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "alembic>=1.20.1",
+    "asyncpg>=0.32.0",
     "fastapi>=0.163.1",
     "pydantic-settings>=2.16.3",
+    "sqlalchemy[asyncio]>=2.1.9",
     "uvicorn[standard]>=0.54.0",
 ]
 
@@ -25,3 +28,20 @@ dev = [
     "pytest>=9.2.0",
     "ruff>=0.17.5",
 ]
+
+
+[tool.ruff]
+# Alembic writes these files; we review them but don't restyle them.
+extend-exclude = ["migrations/versions"]
+
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+# Harmless notice from newer Starlette versions; hide it so real warnings stand out.
+filterwarnings = ["ignore:Using `httpx` with `starlette.testclient`"]
