@@ -1,6 +1,5 @@
 """FastAPI application factory."""
 
-import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -11,8 +10,8 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from rti_mate.api.middleware import RequestMiddleware
 from rti_mate.api.routes import documents, health
 from rti_mate.config import Settings, get_settings
+from rti_mate.db.session import make_engine, make_sessionmaker
 from rti_mate.logging_setup import setup_logging
-from rti_mate.store import RecordStore
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -22,15 +21,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        store = RecordStore(settings.data_file)
+        engine = make_engine(settings)
+        app.state.engine = engine
+        app.state.session_factory = make_sessionmaker(engine)
 
         try:
-            store.load()
-        except (OSError, ValueError):
-            logging.getLogger(__name__).exception("could not load records")
-
-        app.state.store = store
-        yield
+            yield
+        finally:
+            await engine.dispose()
 
     app = FastAPI(
         title="RTI Mate",
@@ -55,9 +53,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
 
     @app.exception_handler(RequestValidationError)
-    async def validation_exception_handler(
-        request: Request, exc: RequestValidationError
-    ):
+    async def validation_exception_handler(request: Request, exc: RequestValidationError):
         errors = [
             {
                 "field": ".".join(str(part) for part in error["loc"]),
