@@ -1,6 +1,6 @@
 """Database queries for documents."""
 
-from sqlalchemy import select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from rti_mate.db.models import Document
@@ -55,25 +55,43 @@ class DocumentRepository:
         q: str | None = None,
         filters: dict[str, str] | None = None,
         limit: int = 20,
-    ) -> list[dict]:
-        statement = select(Document)
+        offset: int = 0,
+    ) -> tuple[int, list[dict]]:
+        conditions = []
         filters = filters or {}
 
         for field, value in filters.items():
             if field in {"id", "title", "source_url", "licence", "doc_type", "published_on"}:
                 column = getattr(Document, "external_id" if field == "id" else field)
-                statement = statement.where(column == value)
+                conditions.append(column == value)
             else:
-                statement = statement.where(Document.metadata_[field].as_string() == value)
-
-        result = await self.session.execute(statement.limit(limit))
-        records = [self.to_record(document) for document in result.scalars().all()]
+                metadata_value = Document.metadata_[field]
+                conditions.append(
+                    or_(
+                        metadata_value.as_string() == value,
+                        metadata_value.contains([value]),
+                    )
+                )
 
         if q:
+            result = await self.session.execute(select(Document).where(*conditions))
+            records = [self.to_record(document) for document in result.scalars().all()]
             needle = q.lower()
             records = [record for record in records if needle in str(record).lower()]
+            return len(records), records[offset : offset + limit]
 
-        return records
+        total = await self.session.scalar(
+            select(func.count()).select_from(Document).where(*conditions)
+        )
+        result = await self.session.execute(
+            select(Document)
+            .where(*conditions)
+            .order_by(Document.external_id)
+            .offset(offset)
+            .limit(limit)
+        )
+        records = [self.to_record(document) for document in result.scalars().all()]
+        return total, records
 
     async def database_ok(self) -> bool:
         await self.session.execute(select(1))

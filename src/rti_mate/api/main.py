@@ -24,6 +24,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         engine = make_engine(settings)
         app.state.engine = engine
         app.state.session_factory = make_sessionmaker(engine)
+
         try:
             yield
         finally:
