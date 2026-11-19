@@ -44,26 +44,26 @@ On a small table, PostgreSQL may choose a Sequential Scan because reading all 20
 ```text
 $ docker images rti_mate:dev
 IMAGE          ID             DISK USAGE   CONTENT SIZE   EXTRA
-rti_mate:dev   91bf2461bf4d        300MB           70MB   U
+rti_mate:dev   e9208fd168f0        300MB           70MB
 
 $ docker run --rm rti_mate:dev id
 uid=999(app) gid=999(app) groups=999(app)
 ```
 
 - Size: 70 MB content size (300 MB local disk usage), under the 400 MB target.
-- BuildKit image export took 109.5 s; the full build and a one-line incremental rebuild were not timed separately.
+- Clean-clone BuildKit image export took 69.9 s; total build and one-line incremental rebuild were not timed separately.
 - `COPY --from=ghcr.io/astral-sh/uv:0.11.32 /uv /uvx /bin/` was cached because the pinned builder image had not changed.
 
 ### The stack
 
 ```text
 $ docker compose ps -a
-rti_mate-api-1       Created
+rti_mate-api-1       Up (healthy)     8000/tcp (not published to host)
 rti_mate-db-1        Up (healthy)     5433->5432
 rti_mate-migrate-1   Exited (0)
 rti_mate-redis-1     Up (healthy)     6379->6379
 
-The API could not bind port 8000 because the unrelated `demo_api` container already uses it.
+The unrelated `demo_api` container owns host port 8000, so RTI Mate was checked on port 8001.
 The migration service logged: records=20 inserted=15 updated=0 unchanged=5
 Idempotent rerun: records=20 inserted=0 updated=0 unchanged=20
 ```
