@@ -1,41 +1,40 @@
 """Document listing and retrieval endpoints."""
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from typing import Annotated
 
-from rti_mate.api.deps import get_store
-from rti_mate.store import RecordStore
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+
+from rti_mate.api.deps import get_repository
+from rti_mate.db.repository import DocumentRepository
 
 router = APIRouter()
 
+RESERVED = {"q", "limit", "offset"}
+
 
 @router.get("/v1/documents")
-def list_documents(
+async def list_documents(
+    request: Request,
+    repository: Annotated[DocumentRepository, Depends(get_repository)],
     q: str | None = None,
     limit: int = Query(default=20, ge=1, le=100),
-    store: RecordStore = Depends(get_store),
+    offset: int = Query(default=0, ge=0),
 ):
-    records = store.list_records()
+    filters = {key: value for key, value in request.query_params.items() if key not in RESERVED}
+    if any("-" in name or "." in name for name in filters):
+        name = sorted(filters)[0]
+        raise HTTPException(status_code=400, detail=f"Unknown filter: {name}")
 
-    if q:
-        records = [record for record in records if q.lower() in str(record).lower()]
-
-    return {
-        "total": len(records),
-        "items": records[:limit],
-    }
+    _, records = await repository.list(q=q, filters=filters, limit=limit, offset=offset)
+    return {"total": len(records), "items": records, "filters": filters}
 
 
 @router.get("/v1/documents/{document_id}")
-def get_document(
+async def get_document(
     document_id: str,
-    store: RecordStore = Depends(get_store),
+    repository: Annotated[DocumentRepository, Depends(get_repository)],
 ):
-    record = store.get_record(document_id)
-
+    record = await repository.get(document_id)
     if record is None:
-        raise HTTPException(
-            status_code=404,
-            detail=f"No document with id '{document_id}'.",
-        )
-
+        raise HTTPException(status_code=404, detail=f"No document with id '{document_id}'.")
     return record
