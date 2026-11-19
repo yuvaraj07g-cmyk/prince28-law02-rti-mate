@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
+from sqlalchemy import text
 
 router = APIRouter()
 
@@ -12,16 +13,18 @@ def health():
 
 
 @router.get("/ready")
-def ready(request: Request):
-    store = request.app.state.store
+async def ready(request: Request):
+    try:
+        async with request.app.state.engine.connect() as connection:
+            await connection.execute(text("SELECT 1"))
+        database = True
+    except Exception:
+        database = False
 
-    if not store.records:
+    if not database:
         return JSONResponse(
             status_code=503,
-            content={"status": "not ready", "checks": {"records_loaded": False}},
+            content={"status": "not ready", "checks": {"database": False}},
         )
 
-    return {
-        "status": "ready",
-        "checks": {"records_loaded": True},
-    }
+    return {"status": "ready", "checks": {"database": True}}

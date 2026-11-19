@@ -46,10 +46,37 @@ Then open http://localhost:8000/docs
 ## Checks
 
 ```bash
-uv run pytest
-uv run ruff check .
+uv run poe test
+uv run poe lint
 ```
 
-PostgreSQL integration tests use a dedicated test database. Set `TEST_DATABASE_URL`,
-run `uv run alembic upgrade head` against that database, then run `uv run pytest`.
-Without `TEST_DATABASE_URL`, those three tests are reported as skipped.
+PostgreSQL integration tests use a dedicated test database. Start the Compose database
+with `docker compose up -d db`, then run `uv run poe test-integration`. The integration
+fixture creates a fresh database, applies migrations, and drops it after the run.
+Without `TEST_DATABASE_URL`, the seven integration tests are skipped.
+
+## Run locally in one command
+
+You need Docker Desktop running. From a fresh clone:
+
+```bash
+docker compose up --build
+```
+
+This starts Postgres (with pgvector), Redis, runs the migrations and loads the sample data once, then starts the API.
+
+- API docs: http://localhost:8000/docs
+- Liveness: http://localhost:8000/health
+- Readiness (checks the database): http://localhost:8000/ready
+
+Stop with `Ctrl+C`, then `docker compose down`. Add `-v` to also delete the database volume.
+
+## Develop and test
+
+| Task | Mac / Linux | Windows |
+|---|---|---|
+| Run the API with reload | `make dev` | `uv run poe dev` |
+| Unit tests (no network) | `make test` | `uv run poe test` |
+| Integration tests (needs `docker compose up`) | `make test-integration` | `uv run poe test-integration` |
+| Coverage report | `make cov` | `uv run poe cov` |
+| Lint and format check | `make lint` | `uv run poe lint` |

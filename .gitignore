@@ -14,3 +14,6 @@ data/raw/
 .vscode/
 .idea/
 .DS_Store
+# Test and coverage output
+.coverage
+htmlcov/

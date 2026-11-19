@@ -24,8 +24,11 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "httpx>=0.28.1",
+    "poethepoet>=0.49.0",
     "pre-commit>=4.7.0",
     "pytest>=9.2.0",
+    "pytest-asyncio>=1.5.0",
+    "pytest-cov>=7.1.0",
     "ruff>=0.17.5",
 ]
 
@@ -45,3 +48,28 @@ testpaths = ["tests"]
 addopts = "-q"
 # Harmless notice from newer Starlette versions; hide it so real warnings stand out.
 filterwarnings = ["ignore:Using `httpx` with `starlette.testclient`"]
+asyncio_mode = "auto"  # async def tests just work
+asyncio_default_fixture_loop_scope = "function"
+[tool.coverage.run]
+source = ["rti_mate"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+
+[tool.poe.tasks]
+dev = "uvicorn rti_mate.api.main:create_app --factory --reload --no-access-log"
+lint = ["_ruff_check", "_ruff_format"]
+_ruff_check = "ruff check ."
+_ruff_format = "ruff format --check ."
+test = "pytest tests/unit"
+cov = "pytest --cov --cov-report=term-missing"
+migrate = "alembic upgrade head"
+seed = "python scripts/load_db.py"
+
+[tool.poe.tasks.test-integration]
+help = "Integration tests against the Postgres from docker compose (run `make up` first)"
+cmd = "pytest tests/integration"
+# Local compose database only; override by exporting TEST_DATABASE_URL yourself.
+env.TEST_DATABASE_URL.default = "postgresql://app:app@localhost:5433/app_test"  # pragma: allowlist secret
