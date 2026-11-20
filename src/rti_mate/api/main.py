@@ -4,9 +4,9 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from rti_mate.api.errors import problem_response
 from rti_mate.api.middleware import RequestMiddleware
 from rti_mate.api.routes import documents, health
 from rti_mate.config import Settings, get_settings
@@ -34,22 +34,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         title="RTI Mate",
         lifespan=lifespan,
     )
+    app.state.settings = settings
 
     @app.exception_handler(StarletteHTTPException)
     async def http_exception_handler(request: Request, exc: StarletteHTTPException):
-        request_id = getattr(request.state, "request_id", None)
-
-        return JSONResponse(
-            status_code=exc.status_code,
-            media_type="application/problem+json",
-            content={
-                "type": "about:blank",
-                "title": "Not Found" if exc.status_code == 404 else "HTTP Error",
-                "status": exc.status_code,
-                "detail": str(exc.detail),
-                "instance": request.url.path,
-                "request_id": request_id,
-            },
+        return problem_response(
+            request,
+            exc.status_code,
+            "Not Found" if exc.status_code == 404 else "HTTP Error",
+            str(exc.detail),
         )
 
     @app.exception_handler(RequestValidationError)
@@ -62,17 +55,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             for error in exc.errors()
         ]
 
-        return JSONResponse(
-            status_code=422,
-            media_type="application/problem+json",
-            content={
-                "type": "about:blank",
-                "title": "Unprocessable Entity",
-                "status": 422,
-                "detail": "Request validation failed",
-                "instance": request.url.path,
-                "errors": errors,
-            },
+        return problem_response(
+            request,
+            422,
+            "Unprocessable Entity",
+            "Request validation failed",
+            errors,
         )
 
     app.add_middleware(RequestMiddleware)

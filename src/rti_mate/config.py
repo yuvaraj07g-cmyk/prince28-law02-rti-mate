@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     database_url: str = "postgresql://localhost:5432/rti_mate"
     db_pool_size: int = 5
     db_max_overflow: int = 10
+    # The commit this image was built from. CI sets it (Dockerfile ARG GIT_SHA); locally "dev".
+    git_sha: str = "dev"
 
     @field_validator("database_url", mode="before")
     @classmethod
