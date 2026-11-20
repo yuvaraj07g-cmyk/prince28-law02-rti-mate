@@ -1,13 +1,37 @@
 import pytest
 from pydantic import ValidationError
+from sqlalchemy.exc import SQLAlchemyError
 
 from rti_mate.config import Settings
 
 
 def test_health_is_ok(client):
+    r = client.get("/health")
+    assert r.status_code == 200
+    assert r.json()["status"] == "ok"
+    assert r.json()["version"] == "dev"  # no GIT_SHA outside a CI-built image
+
+
+def test_health_reports_app_and_environment(client):
+    response = client.get("/health")
+    assert response.json()["app"] == "rti_mate"
+    assert response.json()["env"] == "ci"
+
+
+def test_health_does_not_check_database(client):
+    class UnavailableEngine:
+        def connect(self):
+            raise AssertionError("liveness must not access the database")
+
+    client.app.state.engine = UnavailableEngine()
     response = client.get("/health")
     assert response.status_code == 200
-    assert response.json()["status"] == "ok"
+
+
+def test_git_sha_comes_from_the_environment(monkeypatch):
+    monkeypatch.setenv("GIT_SHA", "3f2c1ab")
+    settings = Settings(app_env="ci", database_url="postgresql://localhost/db", _env_file=None)
+    assert settings.git_sha == "3f2c1ab"
 
 
 def test_ready_checks_database(client):
@@ -16,12 +40,16 @@ def test_ready_checks_database(client):
     assert response.json()["checks"]["database"] is True
 
 
-def test_ready_is_503_when_database_is_down(client):
+@pytest.mark.parametrize(
+    "database_error",
+    [ConnectionError("database unavailable"), SQLAlchemyError("database unavailable")],
+)
+def test_ready_is_503_when_database_is_down(client, database_error: Exception):
     class DeadEngine:
         def connect(self):
             class DeadConnection:
                 async def __aenter__(self):
-                    raise ConnectionError("database unavailable")
+                    raise database_error
 
                 async def __aexit__(self, exc_type, exc, traceback):
                     return False
@@ -31,7 +59,10 @@ def test_ready_is_503_when_database_is_down(client):
     client.app.state.engine = DeadEngine()
     response = client.get("/ready")
     assert response.status_code == 503
-    assert response.json()["checks"]["database"] is False
+    assert response.json() == {
+        "status": "not_ready",
+        "checks": {"database": False},
+    }
 
 
 def test_list_documents_paginates(client):
