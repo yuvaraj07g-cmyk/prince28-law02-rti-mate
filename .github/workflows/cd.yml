@@ -1,0 +1,60 @@
+# CD: after CI passes on main -> migrate Neon -> deploy that exact image -> smoke test.
+# Rollback: Actions -> CD -> Run workflow -> paste an older commit SHA.
+name: CD
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: "Full commit SHA to deploy (rollback). Migrations are skipped."
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:  # never two deploys at once; queue instead of cancelling
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ vars.LIVE_URL }}
+    env:
+      SHA: ${{ github.event.inputs.sha || github.event.workflow_run.head_sha }}
+    steps:
+      # Normal deploy: the merged commit. Rollback: today's main (so the newest smoke test runs).
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+      - uses: astral-sh/setup-uv@v10
+        with:
+          version: "0.11.32"
+          enable-cache: true
+      - run: uv sync --locked
+
+      - name: Run migrations on Neon (normal deploys only)
+        if: github.event_name == 'workflow_run'
+        env:
+          APP_ENV: production
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: uv run alembic upgrade head
+
+      - name: Tell Render to deploy this exact image
+        env:
+          HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}:sha-${SHA}"
+          ENCODED=$(python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1], safe=""))' "$IMAGE")
+          echo "Deploying $IMAGE"
+          curl --fail --silent --show-error -X POST "${HOOK}&imgURL=${ENCODED}"
+
+      - name: Smoke test the live URL
+        run: uv run python scripts/smoke.py "${{ vars.LIVE_URL }}" --expect-version "${SHA}"
