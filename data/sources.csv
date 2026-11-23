@@ -1,0 +1,20 @@
+# Sources for RTI Mate. One row per file to download. Lines starting with # are notes.
+# Start target: Act + rules + guides + 200 decisions
+# Where to look:
+#   https://cic.gov.in/
+#   https://rtionline.gov.in/
+#   https://rti.gov.in/
+# Terms on my project card: Public law and decisions. Cite section or decision number.
+url,source,licence,title
+# Example row (commented rows are ignored):
+# https://example.org/reports/annual-2024.pdf,example-org,"CC BY 4.0",Annual report 2024
+https://rti.dopt.gov.in/Writereaddata/RTI-Act.pdf,dopt,Official Government of India material; applicable reuse terms,Right to Information Act 2005 (English)
+https://rti.dopt.gov.in/Writereaddata/RTI%20Act%2C%202005%20%28Amended%29-English%20Version.PDF,dopt,Official Government of India material; applicable reuse terms,RTI Act 2005 amended (English)
+https://documents.doptcirculars.nic.in/D2/D02rti/RTI_Rules_2019.pdf,dopt,Official Government of India material; applicable reuse terms,Right to Information Rules 2019
+https://rti.dopt.gov.in/Writereaddata/RTI-ActinHindi.pdf,dopt,Official Government of India material; applicable reuse terms,Right to Information Act 2005 (Hindi)
+https://rti.dopt.gov.in/Writereaddata/rtiact_assamese.pdf,dopt,Official Government of India material; applicable reuse terms,Right to Information Act 2005 (Assamese)
+https://rti.dopt.gov.in/Writereaddata/rti-act-2005-gujarati.pdf,dopt,Official Government of India material; applicable reuse terms,Right to Information Act 2005 (Gujarati)
+https://rti.dopt.gov.in/Writereaddata/rtiact-kannada.pdf,dopt,Official Government of India material; applicable reuse terms,Right to Information Act 2005 (Kannada)
+https://rti.img.kerala.gov.in/rti/pdf/rtiact-malayalam.pdf,kerala-rti,Government publication; applicable reuse terms,Right to Information Act 2005 (Malayalam)
+https://rti.dopt.gov.in/Writereaddata/rtiactmarathi.pdf,dopt,Official Government of India material; applicable reuse terms,Right to Information Act 2005 (Marathi)
+http://www.tn.gov.in/rti/proactive/guidebook_rtiact.pdf,tamil-nadu-rti,Official Government of Tamil Nadu material; applicable reuse terms,RTI Act guidebook (Tamil Nadu)
