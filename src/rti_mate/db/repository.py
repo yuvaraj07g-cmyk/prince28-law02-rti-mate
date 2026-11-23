@@ -1,6 +1,6 @@
 """Database queries for documents."""
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import Text, cast, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from rti_mate.db.models import Document
@@ -74,11 +74,13 @@ class DocumentRepository:
                 )
 
         if q:
-            result = await self.session.execute(select(Document).where(*conditions))
-            records = [self.to_record(document) for document in result.scalars().all()]
-            needle = q.lower()
-            records = [record for record in records if needle in str(record).lower()]
-            return len(records), records[offset : offset + limit]
+            like = f"%{q}%"
+            conditions.append(
+                or_(
+                    Document.title.ilike(like),
+                    cast(Document.metadata_, Text).ilike(like),
+                )
+            )
 
         total = await self.session.scalar(
             select(func.count()).select_from(Document).where(*conditions)

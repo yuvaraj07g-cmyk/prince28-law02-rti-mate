@@ -1,8 +1,12 @@
 # RTI Mate
+**Live:** https://rti-mate.onrender.com
+[![CI](https://github.com/yuvaraj07g-cmyk/prince28-law02-rti-mate/actions/workflows/ci.yml/badge.svg)](https://github.com/yuvaraj07g-cmyk/prince28-law02-rti-mate/actions/workflows/ci.yml)
 
 Helps citizens write effective RTI applications and appeals, with the right authority, fees, time limits and Information Commission decisions cited.
 
-**Status:** Day 1 foundation (FastAPI skeleton, quality gates). Live URL from Day 5.
+**Status:** Week 1 foundation complete; public deployment pending Render configuration.
+
+**Live:** Pending Render deployment. Add the live URL, API docs link, health link, and live/uptime badges after the service and UptimeRobot monitor are configured. The GitHub repository URL is not an application URL.
 
 ## Who it's for
 
@@ -53,7 +57,7 @@ uv run poe lint
 PostgreSQL integration tests use a dedicated test database. Start the Compose database
 with `docker compose up -d db`, then run `uv run poe test-integration`. The integration
 fixture creates a fresh database, applies migrations, and drops it after the run.
-Without `TEST_DATABASE_URL`, the seven integration tests are skipped.
+Without `TEST_DATABASE_URL`, the eight integration tests are skipped.
 
 ## Run locally in one command
 
@@ -68,6 +72,8 @@ This starts Postgres (with pgvector), Redis, runs the migrations and loads the s
 - API docs: http://localhost:8000/docs
 - Liveness: http://localhost:8000/health
 - Readiness (checks the database): http://localhost:8000/ready
+
+If port 8000 is already in use, set `$env:API_PORT = "8001"` in PowerShell before starting Compose, then use port 8001 for these URLs.
 
 Stop with `Ctrl+C`, then `docker compose down`. Add `-v` to also delete the database volume.
 

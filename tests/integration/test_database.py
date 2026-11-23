@@ -74,6 +74,16 @@ async def test_repository_filters(seeded, filters, expected):
     assert total == len(expected)
 
 
+async def test_repository_search_counts_before_pagination(seeded):
+    engine = make_engine(seeded)
+    async with make_sessionmaker(engine)() as session:
+        total, items = await DocumentRepository(session).list(q="a", filters={}, limit=1, offset=1)
+    await engine.dispose()
+
+    assert total == 3
+    assert [item["id"] for item in items] == ["002"]
+
+
 def test_api_against_real_database(seeded):
     with TestClient(create_app(seeded)) as client:
         assert client.get("/ready").json()["checks"]["database"] is True

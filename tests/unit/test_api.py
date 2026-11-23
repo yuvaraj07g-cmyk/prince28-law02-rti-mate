@@ -1,8 +1,13 @@
+import json
+import logging
+
 import pytest
 from pydantic import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 
+from rti_mate.api.middleware import logger as middleware_logger
 from rti_mate.config import Settings
+from rti_mate.logging_setup import JsonFormatter
 
 
 def test_health_is_ok(client):
@@ -42,7 +47,7 @@ def test_ready_checks_database(client):
 
 @pytest.mark.parametrize(
     "database_error",
-    [ConnectionError("database unavailable"), SQLAlchemyError("database unavailable")],
+    [OSError("database unavailable"), SQLAlchemyError("database unavailable")],
 )
 def test_ready_is_503_when_database_is_down(client, database_error: Exception):
     class DeadEngine:
@@ -69,11 +74,16 @@ def test_list_documents_paginates(client):
     response = client.get("/v1/documents", params={"limit": 2})
     body = response.json()
     assert response.status_code == 200
-    assert body["total"] == 2
+    assert body["total"] == 3
     assert len(body["items"]) == 2
 
     next_page = client.get("/v1/documents", params={"limit": 1, "offset": 1})
+    assert next_page.json()["total"] == 3
     assert [record["id"] for record in next_page.json()["items"]] == ["002"]
+
+    search_page = client.get("/v1/documents", params={"q": "a", "limit": 1})
+    assert search_page.json()["total"] == 3
+    assert len(search_page.json()["items"]) == 1
 
 
 def test_search_filters_records(client):
@@ -113,9 +123,25 @@ def test_bad_limit_is_422_problem(client):
     assert response.json()["errors"][0]["field"] == "query.limit"
 
 
-def test_request_id_is_echoed(client):
+def test_request_id_is_echoed_and_logged(client, monkeypatch):
+    log_events: list[tuple[str, dict[str, object]]] = []
+
+    def capture_log(message: str, *, extra: dict[str, object]) -> None:
+        log_events.append((message, extra))
+
+    monkeypatch.setattr(middleware_logger, "info", capture_log)
     response = client.get("/health", headers={"X-Request-ID": "abc123"})
+
     assert response.headers["X-Request-ID"] == "abc123"
+    message, context = log_events[0]
+    assert message == "request completed"
+    assert context["request_id"] == "abc123"
+
+    record = logging.LogRecord(
+        "rti_mate.api.middleware", logging.INFO, __file__, 0, message, (), None
+    )
+    record.__dict__.update(context)
+    assert json.loads(JsonFormatter().format(record))["request_id"] == "abc123"
 
 
 def test_app_refuses_to_start_without_app_env(monkeypatch):

@@ -22,7 +22,7 @@ async def check_database(request: Request) -> bool:
     try:
         async with request.app.state.engine.connect() as connection:
             await connection.execute(text("SELECT 1"))
-    except (SQLAlchemyError, ConnectionError):
+    except (SQLAlchemyError, OSError):
         return False
     return True
 

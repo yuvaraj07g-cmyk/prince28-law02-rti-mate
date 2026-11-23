@@ -25,8 +25,8 @@ async def list_documents(
         name = sorted(filters)[0]
         raise HTTPException(status_code=400, detail=f"Unknown filter: {name}")
 
-    _, records = await repository.list(q=q, filters=filters, limit=limit, offset=offset)
-    return {"total": len(records), "items": records, "filters": filters}
+    total, records = await repository.list(q=q, filters=filters, limit=limit, offset=offset)
+    return {"total": total, "items": records, "filters": filters}
 
 
 @router.get("/v1/documents/{document_id}")
