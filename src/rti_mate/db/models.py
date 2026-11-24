@@ -84,3 +84,23 @@ class Page(Base):
         UniqueConstraint("document_id", "page_no", name="uq_pages_document_page"),
         CheckConstraint("page_no >= 1", name="page_no_positive"),
     )
+    # The section path this page starts in, e.g. ["Fever", "Dengue"]: used for citations.
+    headings: Mapped[list[str]] = mapped_column(JSONB, server_default="[]")
+
+
+class ParseFailure(Base):
+    """The dead-letter table: one row per raw file we could not parse, with the reason."""
+
+    __tablename__ = "parse_failures"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    path: Mapped[str] = mapped_column(Text, unique=True)  # data/raw/<source>/<file>
+    sha256: Mapped[str] = mapped_column(String(64))
+    source_url: Mapped[str | None] = mapped_column(Text)
+    reason: Mapped[str] = mapped_column(String(40), index=True)  # no_text_layer, corrupt, ...
+    detail: Mapped[str] = mapped_column(Text, server_default="")
+    attempts: Mapped[int] = mapped_column(server_default="1")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )

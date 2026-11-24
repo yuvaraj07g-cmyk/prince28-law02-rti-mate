@@ -195,6 +195,48 @@ No secret values should be stored in Git or inside the Docker image.
 - The estimate is a planning baseline; PDF text and tokenization can differ from the sample.
 
 ### One thing that went wrong today, and how I fixed it
-
 The source list was accidentally reduced to a fragment, causing a CSV URL validation error. I
 restored the ten complete rows and verified that all ten were already downloaded and safely skipped.
+
+## D07 · Parser comparison
+
+<!-- parsers:start -->
+| File | Parsers (A / B) | Pages | A found | B found | Time (A / B) | Better, why |
+|---|---|---|---|---|---|---|
+| rtiactmarathi-6a26e5a9.pdf | PyMuPDF / pypdf | - | FAILED: no_text_layer | FAILED: no_text_layer | 5.36 s / 0.06 s | Neither: scanned; needs OCR |
+| RTI_Online_User_Manual.pdf | PyMuPDF / pypdf | 29 | 8,729 chars, 37 headings, 0 tables | 8,525 chars, 0 headings, 0 tables | 0.67 s / 0.37 s | PyMuPDF: 37 headings vs 0, similar text |
+| guidebook-rtiact-383e7792.pdf | PyMuPDF / pypdf | 37 | 50,511 chars, 16 headings, 19 tables | 46,890 chars, 0 headings, 0 tables | 7.28 s / 2.44 s | PyMuPDF finds tables; Tamil glyphs remain garbled |
+| RTI_Act_2005.pdf | PyMuPDF / pypdf | 23 | 68,240 chars, 103 headings, 0 tables | 67,488 chars, 0 headings, 0 tables | 6.69 s / 0.31 s | PyMuPDF exposes section headings; some masthead noise |
+| rti-act-c88215d2.pdf | PyMuPDF / pypdf | 23 | 68,240 chars, 103 headings, 0 tables | 67,488 chars, 0 headings, 0 tables | 6.18 s / 0.19 s | PyMuPDF exposes section headings; some masthead noise |
+| rti-actinhindi-6e482adb.pdf | PyMuPDF / pypdf | 27 | 54,533 chars, 913 headings, 0 tables | 51,243 chars, 1 headings, 0 tables | 4.27 s / 0.71 s | pypdf: PyMuPDF over-tags lines as headings |
+| rtiact-kannada-45ae87cf.pdf | PyMuPDF / pypdf | 30 | 73,878 chars, 0 headings, 0 tables | 74,460 chars, 0 headings, 0 tables | 0.19 s / 0.36 s | Neither: Kannada glyphs are garbled in both |
+| rti-act-2005-gujarati-383159c1.pdf | PyMuPDF / pypdf | 77 | 157,808 chars, 74 headings, 15 tables | FAILED: corrupt | 2.40 s / 0.15 s | PyMuPDF: extracts 15 tables; pypdf fails |
+| rti-rules-2019-036c0d50.pdf | PyMuPDF / pypdf | 7 | 27,220 chars, 20 headings, 0 tables | 32,847 chars, 0 headings, 0 tables | 1.57 s / 1.31 s | PyMuPDF: headings; pypdf has more text but no structure |
+| RTI_Act_2005_Amended.pdf | PyMuPDF / pypdf | 25 | 69,731 chars, 1 headings, 0 tables | 69,358 chars, 0 headings, 0 tables | 0.37 s / 1.19 s | PyMuPDF: one heading and similar text, faster |
+<!-- parsers:end -->
+
+### D07 · Parsing my corpus
+
+- Files in the manifest: ___ · parsed: ___ · failed: ___ · pages in Postgres: ___
+- Parsing coverage: ___ % of files
+
+### Failures by reason
+
+| Reason | Files | What I did |
+|---|---|---|
+| | | |
+
+- The one I fixed: file ________ , reason ________ , fix: ________
+
+### What I saw when I read my parsed pages
+
+- A page where the heading path is right (document, page, path):
+- Something that came out wrong (document, page, what):
+- A table: Markdown grid or loose text? (document, page):
+
+### My parser choice
+
+- For PDFs I use ________ because (2 lines, with numbers from the table above):
+- A kind of document in my corpus that neither parser handles well:
+
+### One thing that went wrong today, and how I fixed it
