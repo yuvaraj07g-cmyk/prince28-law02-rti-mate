@@ -195,6 +195,50 @@ No secret values should be stored in Git or inside the Docker image.
 - The estimate is a planning baseline; PDF text and tokenization can differ from the sample.
 
 ### One thing that went wrong today, and how I fixed it
-
 The source list was accidentally reduced to a fragment, causing a CSV URL validation error. I
 restored the ten complete rows and verified that all ten were already downloaded and safely skipped.
+
+## D07 · Parser comparison
+
+<!-- parsers:start -->
+| File | Parsers (A / B) | Pages | A found | B found | Time (A / B) | Better, why |
+|---|---|---|---|---|---|---|
+| rtiactmarathi-6a26e5a9.pdf | PyMuPDF / pypdf | - | FAILED: no_text_layer | FAILED: no_text_layer | 5.36 s / 0.06 s | Neither: scanned; needs OCR |
+| RTI_Online_User_Manual.pdf | PyMuPDF / pypdf | 29 | 8,729 chars, 37 headings, 0 tables | 8,525 chars, 0 headings, 0 tables | 0.67 s / 0.37 s | PyMuPDF: 37 headings vs 0, similar text |
+| guidebook-rtiact-383e7792.pdf | PyMuPDF / pypdf | 37 | 50,511 chars, 16 headings, 19 tables | 46,890 chars, 0 headings, 0 tables | 7.28 s / 2.44 s | PyMuPDF finds tables; Tamil glyphs remain garbled |
+| RTI_Act_2005.pdf | PyMuPDF / pypdf | 23 | 68,240 chars, 103 headings, 0 tables | 67,488 chars, 0 headings, 0 tables | 6.69 s / 0.31 s | PyMuPDF exposes section headings; some masthead noise |
+| rti-act-c88215d2.pdf | PyMuPDF / pypdf | 23 | 68,240 chars, 103 headings, 0 tables | 67,488 chars, 0 headings, 0 tables | 6.18 s / 0.19 s | PyMuPDF exposes section headings; some masthead noise |
+| rti-actinhindi-6e482adb.pdf | PyMuPDF / pypdf | 27 | 54,533 chars, 913 headings, 0 tables | 51,243 chars, 1 headings, 0 tables | 4.27 s / 0.71 s | pypdf: PyMuPDF over-tags lines as headings |
+| rtiact-kannada-45ae87cf.pdf | PyMuPDF / pypdf | 30 | 73,878 chars, 0 headings, 0 tables | 74,460 chars, 0 headings, 0 tables | 0.19 s / 0.36 s | Neither: Kannada glyphs are garbled in both |
+| rti-act-2005-gujarati-383159c1.pdf | PyMuPDF / pypdf | 77 | 157,808 chars, 74 headings, 15 tables | FAILED: corrupt | 2.40 s / 0.15 s | PyMuPDF: extracts 15 tables; pypdf fails |
+| rti-rules-2019-036c0d50.pdf | PyMuPDF / pypdf | 7 | 27,220 chars, 20 headings, 0 tables | 32,847 chars, 0 headings, 0 tables | 1.57 s / 1.31 s | PyMuPDF: headings; pypdf has more text but no structure |
+| RTI_Act_2005_Amended.pdf | PyMuPDF / pypdf | 25 | 69,731 chars, 1 headings, 0 tables | 69,358 chars, 0 headings, 0 tables | 0.37 s / 1.19 s | PyMuPDF: one heading and similar text, faster |
+<!-- parsers:end -->
+
+### D07 · Parsing my corpus
+
+- Files in the manifest: 16 · parsed: 13 unique documents (15 entries including duplicates) · failed: 1 · pages in Postgres: 321
+- Parsing coverage: 93% of unique content (13/14); 94% of manifest entries (15/16)
+
+### Failures by reason
+
+| Reason | Files | What I did |
+|---|---|---|
+| `no_text_layer` | 1 | Scanned Marathi PDF; preserve it and find a Unicode copy or OCR it |
+
+- The one I fixed: none. `data/raw/dopt/rtiactmarathi-6a26e5a9.pdf` has no text layer on 31 pages; OCR needs Tesseract, which is not installed here. The original file and recorded failure are preserved.
+
+### What I saw when I read my parsed pages
+
+- A useful heading path: *User Manual*, page 3, `["(RTI)", "Citizen Module"]`, before the submit instructions.
+- Something that came out wrong: Tamil in the Tamil Nadu guidebook and Kannada in the DOPT PDF are garbled by legacy font encodings.
+- A table: the Tamil Nadu guidebook, page 4, is a Markdown grid (though its Tamil cell text is garbled).
+
+### My parser choice
+
+- For PDFs I use PyMuPDF by default: it finds 19 tables and 16 headings in the Tamil Nadu guidebook, and 103 headings in the English Act; pypdf finds none of those structures. It is slower, and pypdf avoids PyMuPDF's Hindi heading over-detection (913 vs 1).
+- Neither parser handles image-only scans or legacy-font Tamil/Kannada well; those need OCR or a Unicode source.
+
+### One thing that went wrong today, and how I fixed it
+
+The Marathi scan has no extractable text. I left the raw PDF untouched and recorded `no_text_layer`; without Tesseract or a Unicode replacement, it remains an explicit corpus failure rather than pretending it parsed.

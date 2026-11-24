@@ -25,6 +25,34 @@ RTI Act 2005, RTI Rules 2012, Tamil Nadu RTI rules, DoPT RTI guides and FAQs, 1,
 - https://rti.gov.in/
 - Terms: Public law and decisions. Cite section or decision number.
 
+## Collecting documents
+
+### Door 3: add pages from a sitemap
+
+Check the site's `robots.txt` and reuse terms first. A sitemap command only adds
+matching page URLs to `data/sources.csv`; it does not download them.
+
+```powershell
+uv run python scripts/fetch.py sitemap https://SITE/sitemap.xml --include /docs/ --limit 300 --source NAME --licence "LICENCE OR TERMS"
+uv run python scripts/fetch.py urls
+```
+
+`--include` and `--exclude` can each be repeated. Review `data/sources.csv` and
+remove any rows you do not want before running `urls`.
+
+### Door 4: register files downloaded by hand
+
+Use this when the site blocks automated access or documents require a search
+form. If the terms allow personal downloads, save the files under
+`data/raw/NAME/`, then register them:
+
+```powershell
+uv run python scripts/fetch.py manual data/raw/NAME --from-url https://SITE/page-with-the-links --source NAME --licence "LICENCE OR TERMS"
+```
+
+This records provenance and file hashes in `data/manifest.jsonl`. Run it again
+after adding files; already registered files are skipped.
+
 ## Hardest problem (my interview story)
 
 Exemptions and jurisdiction: Section 8 exemptions decide many cases; answers must cite decisions correctly and tell central from state public authorities (a municipality goes to the State Information Commission).
