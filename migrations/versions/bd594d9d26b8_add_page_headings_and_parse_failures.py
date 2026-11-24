@@ -47,10 +47,6 @@ def upgrade() -> None:
     )
     op.create_index(op.f("ix_parse_failures_reason"), "parse_failures", ["reason"], unique=False)
 
-    # This table may exist in a Neon development database, but it must not be
-    # assumed to exist in a fresh CI database. Drop it only if present.
-    op.execute('DROP TABLE IF EXISTS "playing_with_neon"')
-
     op.add_column(
         "pages",
         sa.Column(
@@ -63,7 +59,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    """Dowgrade schema."""
+    """Downgrade schema."""
     op.drop_column("pages", "headings")
     op.drop_index(op.f("ix_parse_failures_reason"), table_name="parse_failures")
     op.drop_table("parse_failures")
