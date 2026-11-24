@@ -217,26 +217,28 @@ restored the ten complete rows and verified that all ten were already downloaded
 
 ### D07 · Parsing my corpus
 
-- Files in the manifest: ___ · parsed: ___ · failed: ___ · pages in Postgres: ___
-- Parsing coverage: ___ % of files
+- Files in the manifest: 16 · parsed: 13 unique documents (15 entries including duplicates) · failed: 1 · pages in Postgres: 321
+- Parsing coverage: 93% of unique content (13/14); 94% of manifest entries (15/16)
 
 ### Failures by reason
 
 | Reason | Files | What I did |
 |---|---|---|
-| | | |
+| `no_text_layer` | 1 | Scanned Marathi PDF; preserve it and find a Unicode copy or OCR it |
 
-- The one I fixed: file ________ , reason ________ , fix: ________
+- The one I fixed: none. `data/raw/dopt/rtiactmarathi-6a26e5a9.pdf` has no text layer on 31 pages; OCR needs Tesseract, which is not installed here. The original file and recorded failure are preserved.
 
 ### What I saw when I read my parsed pages
 
-- A page where the heading path is right (document, page, path):
-- Something that came out wrong (document, page, what):
-- A table: Markdown grid or loose text? (document, page):
+- A useful heading path: *User Manual*, page 3, `["(RTI)", "Citizen Module"]`, before the submit instructions.
+- Something that came out wrong: Tamil in the Tamil Nadu guidebook and Kannada in the DOPT PDF are garbled by legacy font encodings.
+- A table: the Tamil Nadu guidebook, page 4, is a Markdown grid (though its Tamil cell text is garbled).
 
 ### My parser choice
 
-- For PDFs I use ________ because (2 lines, with numbers from the table above):
-- A kind of document in my corpus that neither parser handles well:
+- For PDFs I use PyMuPDF by default: it finds 19 tables and 16 headings in the Tamil Nadu guidebook, and 103 headings in the English Act; pypdf finds none of those structures. It is slower, and pypdf avoids PyMuPDF's Hindi heading over-detection (913 vs 1).
+- Neither parser handles image-only scans or legacy-font Tamil/Kannada well; those need OCR or a Unicode source.
 
 ### One thing that went wrong today, and how I fixed it
+
+The Marathi scan has no extractable text. I left the raw PDF untouched and recorded `no_text_layer`; without Tesseract or a Unicode replacement, it remains an explicit corpus failure rather than pretending it parsed.
