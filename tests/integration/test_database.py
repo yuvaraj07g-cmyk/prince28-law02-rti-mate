@@ -50,7 +50,22 @@ async def test_migrations_created_the_tables(settings):
         )
         version = await conn.scalar(text("SELECT version_num FROM alembic_version"))
     await engine.dispose()
-    assert {"documents", "pages", "alembic_version"} <= tables
+    assert {
+        "documents",
+        "pages",
+        "parse_failures",
+        "alembic_version",
+        "playing_with_neon",
+    } <= tables
+    columns = set(
+        await conn.scalars(
+            text(
+                "SELECT column_name FROM information_schema.columns "
+                "WHERE table_schema='public' AND table_name='pages'"
+            )
+        )
+    )
+    assert "headings" in columns
     assert version
 
 
