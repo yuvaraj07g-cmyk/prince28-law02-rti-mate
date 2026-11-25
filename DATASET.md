@@ -20,20 +20,21 @@ Public law and decisions. Cite section or decision number.
 - No personal data is collected.
 
 <!-- generated:start -->
-## Sources (generated 2026-11-23 16:14 UTC by scripts/dataset_report.py)
+## Sources (generated 2026-11-24 05:59 UTC by scripts/dataset_report.py)
 
 | Source | Licence / terms | Files | MB | Pages* | How | Fetched | Example URL |
 |---|---|---|---|---|---|---|---|
 | dopt | Official Government of India material; subject to applicable reuse terms | 10 | 8.2 | 311 | http+manual | 2026-11-23 | https://rti.dopt.gov.in/rtiact.html#RTI_Act_2005.pdf |
 | kerala-rti | Government publication; applicable reuse terms | 1 | 0.2 | 20 | http | 2026-11-23 | https://rti.img.kerala.gov.in/rti/pdf/rtiact-malayalam.pdf |
+| rti-mate-github | GitHub repository content; subject to repository licence | 3 | 0.0 | 2 | git @ 5d86fd0e1e | 2026-11-24 | https://github.com/yuvaraj07g-cmyk/prince28-law02-rti-mate/blob/HEAD/docs/CAPACITY.md |
 | rtionline | Official Government of India material; subject to applicable reuse terms | 1 | 1.7 | 29 | manual | 2026-11-23 | https://rtionline.gov.in/#RTI_Online_User_Manual.pdf |
 | tamil-nadu-rti | Official Government of Tamil Nadu material; applicable reuse terms | 1 | 1.2 | 37 | http | 2026-11-23 | http://www.tn.gov.in/rti/proactive/guidebook_rtiact.pdf |
 
-**Total:** 13 files, 11.4 MB, 397 pages. Not downloaded: 0 blocked by robots.txt, 0 failed.
+**Total:** 16 files, 11.4 MB, 399 pages. Not downloaded: 0 blocked by robots.txt, 0 failed.
 
 *Pages = PDF pages, plus one page per 3,000 characters of text or HTML.
 
-## Files (first 13 of 13)
+## Files (first 16 of 16)
 
 The complete list, with a sha256 fingerprint of every file, is `data/manifest.jsonl`.
 
@@ -50,8 +51,11 @@ The complete list, with a sha256 fingerprint of every file, is `data/manifest.js
 | 9 | Right to Information Act 2005 (Kannada) | dopt | 30 | 2026-11-23 | https://rti.dopt.gov.in/Writereaddata/rtiact-kannada.pdf |
 | 10 | Right to Information Act 2005 (Marathi) | dopt | 31 | 2026-11-23 | https://rti.dopt.gov.in/Writereaddata/rtiactmarathi.pdf |
 | 11 | Right to Information Act 2005 (Malayalam) | kerala-rti | 20 | 2026-11-23 | https://rti.img.kerala.gov.in/rti/pdf/rtiact-malayalam.pdf |
-| 12 | RTI_Online_User_Manual | rtionline | 29 | 2026-11-23 | https://rtionline.gov.in/#RTI_Online_User_Manual.pdf |
-| 13 | RTI Act guidebook (Tamil Nadu) | tamil-nadu-rti | 37 | 2026-11-23 | http://www.tn.gov.in/rti/proactive/guidebook_rtiact.pdf |
+| 12 | docs/CAPACITY.md | rti-mate-github | 1 | 2026-11-24 | https://github.com/yuvaraj07g-cmyk/prince28-law02-rti-mate/blob/HEAD/docs/CAPACITY.md |
+| 13 | docs/QUESTIONS.md | rti-mate-github | 1 | 2026-11-24 | https://github.com/yuvaraj07g-cmyk/prince28-law02-rti-mate/blob/HEAD/docs/QUESTIONS.md |
+| 14 | docs/REQUIREMENTS.md | rti-mate-github |  | 2026-11-24 | https://github.com/yuvaraj07g-cmyk/prince28-law02-rti-mate/blob/HEAD/docs/REQUIREMENTS.md |
+| 15 | RTI_Online_User_Manual | rtionline | 29 | 2026-11-23 | https://rtionline.gov.in/#RTI_Online_User_Manual.pdf |
+| 16 | RTI Act guidebook (Tamil Nadu) | tamil-nadu-rti | 37 | 2026-11-23 | http://www.tn.gov.in/rti/proactive/guidebook_rtiact.pdf |
 <!-- generated:end -->
 
 ## Known gaps
