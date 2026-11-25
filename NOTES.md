@@ -110,31 +110,31 @@ Combined coverage: 96% (25 passed)
 - Hosting: Render
 - Database: Neon PostgreSQL
 - Environment: Production
+- Verified 2026-11-25: `/health` returned 200 with version `30e297c5f5a042acb5bf997fa3600cf0e7b84a2a`; `/ready` returned 200 with the database check true; `/v1/documents?limit=1` returned 200.
+- The running version is older than current `main` (`3aff0c8d2e955b234fb95873a601239fd6d7adb6`); the latest CD run did not deploy.
 
 ### 2. GitHub Actions
 
 - Repository: https://github.com/yuvaraj07g-cmyk/prince28-law02-rti-mate
 - Actions: https://github.com/yuvaraj07g-cmyk/prince28-law02-rti-mate/actions
-- CI run for pull request 1: (paste run link)
-- First automatic deployment: (paste CD run link)
-- Merge time: **__:__**
-- Smoke test passed at: **__:__**
-- Lead time: **___ minutes**
+- Latest CI run on `main`: [run 32](https://github.com/yuvaraj07g-cmyk/prince28-law02-rti-mate/actions/runs/45577768540), passed.
+- Latest CD run: [run 9](https://github.com/yuvaraj07g-cmyk/prince28-law02-rti-mate/actions/runs/45578036785), failed during the Neon migration.
+- Last successful CD run: [run 6](https://github.com/yuvaraj07g-cmyk/prince28-law02-rti-mate/actions/runs/45357047967), deployed version `30e297c5f5a042acb5bf997fa3600cf0e7b84a2a`.
 
 ### 3. Smoke Test Output
 
 ```text
-Paste the last four lines of the "Smoke test the live URL" step.
+ok   /health -> 200, version 30e297c5f5a042acb5bf997fa3600cf0e7b84a2a
+ok   /ready -> 200 {'status': 'ready', 'checks': {'database': True}}
+ok   /v1/documents?limit=1 -> 200
+Smoke test passed
 ```
 
 ### 4. Rollback Drill
 
-- Rolled back to SHA: __________
-- Rollback started: **__:__**
-- Smoke test passed: **__:__**
-- Rollback duration: ___ minutes
-- Rolled forward to SHA: __________
-- Roll-forward duration: ___ minutes
+Not performed. The deployment pipeline is currently blocked before the deploy step, so a rollback drill cannot be recorded as completed. After resolving the migration state, run the CD workflow manually with a known-good older image SHA, verify the smoke test, then run it again with the current `main` SHA and record both run links and durations here.
+
+The latest migration attempt stopped because Neon already contains the `parse_failures` relation when Alembic revision `bd594d9d26b8` tried to create it. Verify the database schema and `alembic_version` before any stamp or schema change; no production database objects were changed by this investigation.
 
 **Why is rollback safe here?**
 
@@ -145,6 +145,7 @@ The rollback changes the application image without reversing database migrations
 - `DATABASE_URL`: GitHub Actions secret and Render environment variable.
 - `RENDER_DEPLOY_HOOK`: GitHub Actions secret only.
 - `LIVE_URL`: GitHub Actions variable.
+- The migration job reached Neon, confirming the database connection is available. The latest CD run stopped before invoking the Render deploy hook; verify the hook on the next successful migration/deploy run.
 
 No secret values should be stored in Git or inside the Docker image.
 
@@ -154,7 +155,7 @@ No secret values should be stored in Git or inside the Docker image.
 - Monitor URL: https://rti-mate.onrender.com/health
 - Check interval: Every 5 minutes.
 - Alert email: yuvaraj11j@gmail.com
-- Current status: 502 Bad Gateway in North America.
+- Current endpoint check (2026-11-25): `/health` returned HTTP 200. The README health badge monitors this endpoint; confirm the UptimeRobot dashboard separately for monitor history and alert delivery.
 
 **One improvement for faster first requests:** Use an always-on hosting service or paid plan to avoid cold starts.
 
