@@ -17,3 +17,6 @@ data/raw/
 # Test and coverage output
 .coverage
 htmlcov/
+# Python cache files
+__pycache__/
+*.pyc
