@@ -49,7 +49,7 @@ class FakeEngine:
 
 @pytest.fixture
 def client():
-    settings = Settings(app_env="ci")
+    settings = Settings(app_env="ci", _env_file=None)
     app = create_app(settings)
     repository = FakeRepository()
     app.dependency_overrides[get_repository] = lambda: repository

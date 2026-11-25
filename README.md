@@ -1,12 +1,14 @@
 # RTI Mate
 **Live:** https://rti-mate.onrender.com
 [![CI](https://github.com/yuvaraj07g-cmyk/prince28-law02-rti-mate/actions/workflows/ci.yml/badge.svg)](https://github.com/yuvaraj07g-cmyk/prince28-law02-rti-mate/actions/workflows/ci.yml)
+[![Live health](https://img.shields.io/website?url=https%3A%2F%2Frti-mate.onrender.com%2Fhealth)](https://rti-mate.onrender.com/health)
 
 Helps citizens write effective RTI applications and appeals, with the right authority, fees, time limits and Information Commission decisions cited.
 
-**Status:** Week 1 foundation complete; public deployment pending Render configuration.
+**Deployment status:** The live service passed `/health`, `/ready`, and `/v1/documents?limit=1` smoke checks on 2026-11-25. It reports version `30e297c5f5a042acb5bf997fa3600cf0e7b84a2a`; the latest `main` commit has not deployed because its CD migration run failed. See [CD runs](https://github.com/yuvaraj07g-cmyk/prince28-law02-rti-mate/actions/workflows/cd.yml).
 
-**Live:** Pending Render deployment. Add the live URL, API docs link, health link, and live/uptime badges after the service and UptimeRobot monitor are configured. The GitHub repository URL is not an application URL.
+- [API docs](https://rti-mate.onrender.com/docs)
+- [Health](https://rti-mate.onrender.com/health)
 
 ## Who it's for
 
