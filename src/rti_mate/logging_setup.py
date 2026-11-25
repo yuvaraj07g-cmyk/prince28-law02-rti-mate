@@ -2,7 +2,10 @@
 
 import json
 import logging
+from contextvars import ContextVar
 from datetime import UTC, datetime
+
+request_id_ctx: ContextVar[str] = ContextVar("request_id", default="")
 
 _STANDARD_RECORD_ATTRIBUTES = frozenset(logging.makeLogRecord({}).__dict__)
 
