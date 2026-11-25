@@ -8,7 +8,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from rti_mate.api.errors import problem_response
 from rti_mate.api.middleware import RequestMiddleware
-from rti_mate.api.routes import ask, documents, health
+from rti_mate.api.routes import documents, health
 from rti_mate.config import Settings, get_settings
 from rti_mate.db.session import make_engine, make_sessionmaker
 from rti_mate.logging_setup import setup_logging
@@ -66,5 +66,4 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.add_middleware(RequestMiddleware)
     app.include_router(health.router)
     app.include_router(documents.router)
-    app.include_router(ask.router)
     return app
