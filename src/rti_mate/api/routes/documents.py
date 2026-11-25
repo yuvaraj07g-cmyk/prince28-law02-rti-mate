@@ -12,7 +12,7 @@ router = APIRouter()
 RESERVED = {"q", "limit", "offset"}
 
 
-@router.get("/v1/documents")
+@router.get("/documents")
 async def list_documents(
     request: Request,
     repository: Annotated[DocumentRepository, Depends(get_repository)],
@@ -29,7 +29,7 @@ async def list_documents(
     return {"total": total, "items": records, "filters": filters}
 
 
-@router.get("/v1/documents/{document_id}")
+@router.get("/documents/{document_id}")
 async def get_document(
     document_id: str,
     repository: Annotated[DocumentRepository, Depends(get_repository)],

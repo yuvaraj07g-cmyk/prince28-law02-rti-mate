@@ -198,3 +198,37 @@ No secret values should be stored in Git or inside the Docker image.
 
 The source list was accidentally reduced to a fragment, causing a CSV URL validation error. I
 restored the ten complete rows and verified that all ten were already downloaded and safely skipped.
+
+### D08 · LLM gateway
+
+- Primary: gemini-3.8-flash (Gemini) · fallback: openai/gpt-oss-20b (Groq)
+- First question on my laptop: first words after ___ s, total ___ s, tokens in ___ / out ___, cost Rs ___
+- Same question on my live URL (second, awake request): first words after ___ s. Day 1 target: under 1.5 s
+
+### Tokens: English against Tamil
+
+| Message | tokens in |
+|---|---|
+| "Hi" (baseline: mostly my system prompt) | |
+| The English sentence | |
+| The same sentence in Tamil | |
+
+- The Tamil message needs about ___ times the tokens of the English one.
+
+### What the model does without my documents
+
+- Question 6 ("Has the municipality received my RTI application?"): did it admit it can't know? Its exact words:
+- A detail it got wrong or invented (question → what it said → what is true):
+- The off-topic question: did it decline in one sentence?
+
+### Fallback and circuit breaker
+
+- With the primary broken: provider ________ , fallback ____ , first words after ___ s
+- The question at which "llm call gemini … error" stopped appearing in the log: number ___
+
+### The bill
+
+- /v1/usage today: calls ___ , errors ___ , fallbacks ___ , cost Rs ___
+- Average per answered question: Rs ___ (my Day 1 target: under Rs 0.50)
+
+### One thing that went wrong today, and how I fixed it
