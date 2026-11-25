@@ -4,12 +4,10 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import APIRouter, FastAPI
+
 from rti_mate.api.errors import register_error_handlers
 from rti_mate.api.middleware import request_context
 from rti_mate.api.routes import chat, documents, health
-from rti_mate.api.errors import problem_response
-from rti_mate.api.middleware import RequestMiddleware
-from rti_mate.api.routes import documents, health
 from rti_mate.config import Settings, get_settings
 from rti_mate.db.llm_calls import make_recorder
 from rti_mate.db.session import make_engine, make_sessionmaker
@@ -45,5 +43,4 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     v1.include_router(chat.router)
     app.include_router(health.router)
     app.include_router(v1)
-    app.include_router(documents.router)
     return app

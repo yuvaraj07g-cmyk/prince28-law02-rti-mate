@@ -60,8 +60,6 @@ def client(llm):
         database_url="postgresql://localhost:5432/unused",
         _env_file=None,
     )
-def client():
-    settings = Settings(app_env="ci", _env_file=None)
     app = create_app(settings)
     repository = FakeRepository()
 

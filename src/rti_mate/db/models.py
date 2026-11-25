@@ -78,6 +78,8 @@ class Page(Base):
     )
     page_no: Mapped[int]
     text: Mapped[str] = mapped_column(Text)
+    # The section path this page starts in, e.g. ["Fever", "Dengue"]: used for citations.
+    headings: Mapped[list[str]] = mapped_column(JSONB, server_default="[]")
 
     document: Mapped[Document] = relationship(back_populates="pages")
 
@@ -107,9 +109,7 @@ class LlmCall(Base):
     fallback_used: Mapped[bool] = mapped_column(server_default="false")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), index=True
-=======
-    # The section path this page starts in, e.g. ["Fever", "Dengue"]: used for citations.
-    headings: Mapped[list[str]] = mapped_column(JSONB, server_default="[]")
+    )
 
 
 class ParseFailure(Base):
