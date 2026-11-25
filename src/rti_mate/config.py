@@ -27,6 +27,18 @@ class Settings(BaseSettings):
     @classmethod
     def convert_database_url(cls, value: str) -> str:
         return to_asyncpg_url(value)
+        # LLM gateway (Day 8). Keys default to empty so tests and CI never need them.
+
+    gemini_api_key: str = ""
+    groq_api_key: str = ""
+    llm_primary_model: str = "gemini-3.8-flash"
+    llm_fallback_model: str = "openai/gpt-oss-20b"
+    # Both providers speak the OpenAI API, so any compatible server works (Ollama, a test fake).
+    llm_primary_base_url: str = "https://generativelanguage.googleapis.com/v1beta/openai"
+    llm_fallback_base_url: str = "https://api.groq.com/openai/v1"
+    llm_timeout_seconds: float = 30.0
+    usd_inr: float = 95.0  # rupees per US dollar, for cost estimates
+    prompts_dir: Path = Path("prompts")
 
 
 @lru_cache
