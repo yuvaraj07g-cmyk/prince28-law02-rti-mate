@@ -203,6 +203,9 @@ async def test_provider_sends_an_openai_style_request_and_reads_the_reply():
     assert reply == Reply("Hello.", 9, 2)
     assert seen["url"] == "https://llm.test/v1/chat/completions" and seen["auth"] == "Bearer k-123"
     assert seen["body"]["model"] == "m-1" and seen["body"]["messages"] == ASK
+    assert "response_format" not in seen["body"]
+    await provider_with(handler).generate(ASK, response_format={"type": "json_object"})
+    assert seen["body"]["response_format"] == {"type": "json_object"}  # passed on untouched
 
 
 async def test_provider_turns_http_errors_into_llm_errors():
