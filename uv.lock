@@ -1545,7 +1545,9 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/e9/ba/1905e09be996db95e7fc06b1570f519a41bd68e77a1b677d0db36bdddf84/regex-2026.11.25-cp315-cp315t-win32.whl", hash = "sha256:a21de09d9b11d61ffa254d3b6a3d2386f2b3ebd9b1c67841fe31da758953bf31", size = 278969, upload-time = "2026-11-26T01:32:21.989Z" },
     { url = "https://files.pythonhosted.org/packages/d5/48/cd408af338a7c7f4bb568fa142ba2b2abe678c68099ce2a6ff09c92473a2/regex-2026.11.25-cp315-cp315t-win_amd64.whl", hash = "sha256:b8092f2ac3e23455826df939804bb2187d5f5d5e3e3e1256542f31971d442970", size = 288461, upload-time = "2026-11-26T01:32:23.502Z" },
     { url = "https://files.pythonhosted.org/packages/8e/5e/a1867fd9136d150f3b79c2dae681b42ad2fbad1db1121802328320dd7edf/regex-2026.11.25-cp315-cp315t-win_arm64.whl", hash = "sha256:2b7c11b0b87784e8788e57a327ca42a46b9c872e1149fb76139faab08d856eaf", size = 288930, upload-time = "2026-11-26T01:32:24.96Z" },
+]
 
+[[package]]
 name = "regex"
 version = "2026.11.23"
 source = { registry = "https://pypi.org/simple" }
