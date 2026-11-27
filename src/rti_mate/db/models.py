@@ -111,6 +111,7 @@ class LlmCall(Base):
         DateTime(timezone=True), server_default=func.now(), index=True
     )
 
+
 class ParseFailure(Base):
     """The dead-letter table: one row per raw file we could not parse, with the reason."""
 
