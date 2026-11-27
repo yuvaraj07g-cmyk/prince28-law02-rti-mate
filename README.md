@@ -1,12 +1,14 @@
 # RTI Mate
 **Live:** https://rti-mate.onrender.com
 [![CI](https://github.com/yuvaraj07g-cmyk/prince28-law02-rti-mate/actions/workflows/ci.yml/badge.svg)](https://github.com/yuvaraj07g-cmyk/prince28-law02-rti-mate/actions/workflows/ci.yml)
+[![Live health](https://img.shields.io/website?url=https%3A%2F%2Frti-mate.onrender.com%2Fhealth)](https://rti-mate.onrender.com/health)
 
 Helps citizens write effective RTI applications and appeals, with the right authority, fees, time limits and Information Commission decisions cited.
 
-**Status:** Week 1 foundation complete; public deployment pending Render configuration.
+**Deployment status:** The live service passed `/health`, `/ready`, and `/v1/documents?limit=1` smoke checks on 2026-11-25. It reports version `30e297c5f5a042acb5bf997fa3600cf0e7b84a2a`; the latest `main` commit has not deployed because its CD migration run failed. See [CD runs](https://github.com/yuvaraj07g-cmyk/prince28-law02-rti-mate/actions/workflows/cd.yml).
 
-**Live:** Pending Render deployment. Add the live URL, API docs link, health link, and live/uptime badges after the service and UptimeRobot monitor are configured. The GitHub repository URL is not an application URL.
+- [API docs](https://rti-mate.onrender.com/docs)
+- [Health](https://rti-mate.onrender.com/health)
 
 ## Who it's for
 
@@ -24,6 +26,34 @@ RTI Act 2005, RTI Rules 2012, Tamil Nadu RTI rules, DoPT RTI guides and FAQs, 1,
 - https://rtionline.gov.in/
 - https://rti.gov.in/
 - Terms: Public law and decisions. Cite section or decision number.
+
+## Collecting documents
+
+### Door 3: add pages from a sitemap
+
+Check the site's `robots.txt` and reuse terms first. A sitemap command only adds
+matching page URLs to `data/sources.csv`; it does not download them.
+
+```powershell
+uv run python scripts/fetch.py sitemap https://SITE/sitemap.xml --include /docs/ --limit 300 --source NAME --licence "LICENCE OR TERMS"
+uv run python scripts/fetch.py urls
+```
+
+`--include` and `--exclude` can each be repeated. Review `data/sources.csv` and
+remove any rows you do not want before running `urls`.
+
+### Door 4: register files downloaded by hand
+
+Use this when the site blocks automated access or documents require a search
+form. If the terms allow personal downloads, save the files under
+`data/raw/NAME/`, then register them:
+
+```powershell
+uv run python scripts/fetch.py manual data/raw/NAME --from-url https://SITE/page-with-the-links --source NAME --licence "LICENCE OR TERMS"
+```
+
+This records provenance and file hashes in `data/manifest.jsonl`. Run it again
+after adding files; already registered files are skipped.
 
 ## Hardest problem (my interview story)
 

@@ -295,9 +295,9 @@ kept classify_v1 as the best-performing version.
 
 - Queued: 20. At the kill: queued **—**, running **—**, done **—**, failed **—**
 - After the new worker: done **—** + skipped **—** + failed **—** = **—** (must be 20)
-- Documents in the database: **—**, different ids: **—** (must be equal)
+- Documents in the database: **—**, different IDs: **—** (must be equal)
 - The interrupted items came back after **— s**. Why that long: **—**
-- Why nothing was doubled (one sentence, in my own words): **—**
+- Why nothing was doubled (one sentence, in my own words): **The worker uses idempotent processing and unique document IDs to prevent duplicate document insertion.**
 
 ### Dead-letter list
 
