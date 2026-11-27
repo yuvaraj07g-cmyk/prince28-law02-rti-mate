@@ -9,13 +9,16 @@ authors = [
 requires-python = ">=3.12"
 dependencies = [
     "alembic>=1.20.1",
+    "arq>=0.28.0",
     "asyncpg>=0.32.0",
     "fastapi>=0.163.1",
     "httpx>=0.28.1",
     "protego>=0.7.0",
     "pydantic-settings>=2.16.3",
+    "pymupdf>=1.26,<2",
     "pypdf>=7.1.1",
     "sqlalchemy[asyncio]>=2.1.9",
+    "trafilatura>=2.4.0",
     "uvicorn[standard]>=0.54.0",
 ]
 
@@ -63,6 +66,7 @@ skip_covered = true
 
 [tool.poe.tasks]
 dev = "uvicorn rti_mate.api.main:create_app --factory --reload --no-access-log"
+worker = "arq rti_mate.workers.main.WorkerSettings"
 lint = ["_ruff_check", "_ruff_format"]
 _ruff_check = "ruff check ."
 _ruff_format = "ruff format --check ."

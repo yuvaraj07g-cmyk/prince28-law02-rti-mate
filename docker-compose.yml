@@ -34,6 +34,7 @@ services:
     build: .
     command: ["sh", "-c", "alembic upgrade head && python scripts/load_db.py"]
     environment: &app-env
+      REDIS_URL: redis://redis:6379
       APP_ENV: local
       DATABASE_URL: postgresql://app:app@db:5432/app  # pragma: allowlist secret
     depends_on:
@@ -43,6 +44,10 @@ services:
   api:
     build: .
     environment: *app-env
+    env_file: &keys  # your model keys; the values above win over the ones in .env
+      - path: .env
+        required: false
+
     ports:
       - "${API_PORT:-8000}:8000"
     depends_on:
@@ -57,6 +62,20 @@ services:
       interval: 10s
       timeout: 3s
       retries: 5
+  worker:  # the same image as the api, started with a different command
+    build: .
+    command: ["arq", "rti_mate.workers.main.WorkerSettings"]
+    environment: *app-env
+    env_file: *keys
+    volumes:
+      - ./data/raw:/app/data/raw:ro  # your downloaded files; without them it downloads again
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 
 volumes:
   pgdata:

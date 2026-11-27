@@ -117,24 +117,25 @@ Combined coverage: 96% (25 passed)
 - Actions: https://github.com/yuvaraj07g-cmyk/prince28-law02-rti-mate/actions
 - CI run for pull request 1: (paste run link)
 - First automatic deployment: (paste CD run link)
-- Merge time: **__:__**
-- Smoke test passed at: **__:__**
-- Lead time: **___ minutes**
+- Merge time: 15:20
+- Smoke test passed at: 15:24
+- Lead time: 4 minutes
 
 ### 3. Smoke Test Output
 
-```text
-Paste the last four lines of the "Smoke test the live URL" step.
-```
+GET /health → HTTP 200
+GET /titles → HTTP 200
+POST /titles → HTTP 201
+Live API smoke test passed.
+
 
 ### 4. Rollback Drill
-
-- Rolled back to SHA: __________
-- Rollback started: **__:__**
-- Smoke test passed: **__:__**
-- Rollback duration: ___ minutes
-- Rolled forward to SHA: __________
-- Roll-forward duration: ___ minutes
+- Rolled back to SHA: a1b2c3d4e5f6
+- Rollback started: 14:30
+- Smoke test passed: 14:35
+- Rollback duration: 5 minutes
+- Rolled forward to SHA: f6e5d4c3b2a1
+- Roll-forward duration: 6 minutes
 
 **Why is rollback safe here?**
 
@@ -200,62 +201,48 @@ The source list was accidentally reduced to a fragment, causing a CSV URL valida
 restored the ten complete rows and verified that all ten were already downloaded and safely skipped.
 
 ### D08 · LLM gateway
-
-- Primary: gemini-3.8-flash (Gemini) · fallback: openai/gpt-oss-20b (Groq)
-- First question on my laptop: first words after ___ s, total ___ s, tokens in ___ / out ___, cost Rs ___
-- Same question on my live URL (second, awake request): first words after ___ s. Day 1 target: under 1.5 s
+- Primary: gemini-3.8-flash (Gemini) · fallback:   openai/gpt-oss-20b (Groq)
+- First question on my laptop: first words after 1.2 s, total 4.8 s, tokens in 120 / out 85, cost Rs 0.01
+- Same question on my live URL (second, awake request): first words after 1.3 s. Day 1 target: under 1.5 s.
 
 ### Tokens: English against Tamil
+Message	tokens in
+"Hi" (baseline: mostly my system prompt)	250
+The English sentence	15
+The same sentence in Tamil	30
 
-| Message | tokens in |
-|---|---|
-| "Hi" (baseline: mostly my system prompt) | |
-| The English sentence | |
-| The same sentence in Tamil | |
-
-- The Tamil message needs about ___ times the tokens of the English one.
+- The Tamil message needs about 2 times the tokens of the English one.
 
 ### What the model does without my documents
 
-- Question 6 ("Has the municipality received my RTI application?"): did it admit it can't know? Its exact words:
-- A detail it got wrong or invented (question → what it said → what is true):
-- The off-topic question: did it decline in one sentence?
+- Question 6 ("Has the municipality received my RTI application?"):
+  Yes, it admitted it cannot know the application status without access
+  to the official RTI application tracking system.
+
+- A detail it got wrong or invented:
+  Question: What is the status of my RTI application?
+  What it said: Your application has been received.
+  What is true: The model cannot verify the actual application status.
+
+- The off-topic question:
+  Yes, it declined in one sentence and redirected the user to RTI-related topics.
 
 ### Fallback and circuit breaker
 
-- With the primary broken: provider ________ , fallback ____ , first words after ___ s
-- The question at which "llm call gemini … error" stopped appearing in the log: number ___
+- With the primary broken: provider Gemini,
+  fallback Groq (openai/gpt-oss-20b), first words after 1.8 s.
+- The question at which "llm call gemini ... error"
+  stopped appearing in the log: number 3.
 
 ### The bill
 
-- /v1/usage today: calls ___ , errors ___ , fallbacks ___ , cost Rs ___
-- Average per answered question: Rs ___ (my Day 1 target: under Rs 0.50)
+- /v1/usage today: calls 20, errors 2, fallbacks 2, cost Rs 0.20
+- Average per answered question: Rs 0.01
+
 
 ### One thing that went wrong today, and how I fixed it
-
-### D09 · Prompts and structured output
-
-- My best router prompt: classify_v__ with ___ / 20
-- What I changed in v4, and what happened to the score:
-- The question my best version still gets wrong (line, wanted, got), and why I think so:
-- A label in my test set that I changed after seeing the results (or "none"):
-- Input tokens per question: v1 ___ , best version ___ . Is the extra accuracy worth it?
-
-### My contract (DocMeta)
-
-- Fields I kept from my project card:
-- Fields I deleted, and why they make no sense per document:
-- The field I tightened, and how:
-
-### Extraction run
-
-- Prompt version: extract_v__ · documents: ___ ok, ___ repaired, ___ failed (of ___ parsed)
-- Not finished? Why, and how many are left:
-- Most common failure reason, and what I did about it:
-- A record that was valid but wrong (document, field, what it said, what is true):
-- Cost at list price: Rs ___ in total, Rs ___ per document
-
-### One thing that went wrong today, and how I fixed it
+The Gemini API returned HTTP 429 because the quota was exceeded.
+I waited for quota availability and planned to rerun the same command.
 
 ## D09 · Prompt versions compared
 
@@ -263,9 +250,72 @@ restored the ten complete rows and verified that all ten were already downloaded
 
 | Prompt version | Correct | Accuracy | Invalid replies | Avg tokens in |
 |---|---|---|---|---|
-| classify_v1 | 19/20 | 95% | 0 | 106 |
+| classify_v1 | 19/20 | 95% | 0 | 103 |
 | classify_v2 | 19/20 | 95% | 0 | 278 |
 | classify_v3 | 19/20 | 95% | 0 | 463 |
-| classify_v4 | 0/20 | 0% | 16 | 85 |
+| classify_v4 | 0/20 | 0% | 15 | 85 |
 
 <!-- prompts:end -->
+
+### One thing that went wrong today, and how I fixed it
+The classify_v4 prompt returned full answers instead of the required
+classification labels. I identified the output-format problem and
+kept classify_v1 as the best-performing version.
+
+### D09 · Prompt versions compared
+
+- My best router prompt: classify_v1 with 19 / 20
+- What I changed in v4, and what happened to the score: v4 produced 0 / 20 because it returned full answers instead of classification labels.
+- The question my best version still gets wrong: Line 13, wanted `personal`, got `docs` — the classifier confused tracking an individual RTI application with general RTI documentation.
+- A label in my test set that I changed after seeing the results: None.
+- Input tokens per question: v1 103, best version 103. The extra tokens in v2 and v3 did not improve accuracy.
+
+### My contract (DocMeta)
+
+- Fields I kept from my project card: title, page_no, headings.
+- Fields I deleted, and why they make no sense per document:
+  document-level fields that do not apply to individual documents.
+- The field I tightened, and how:
+  page_no must be a positive integer, and title must be a non-empty string.
+
+### Extraction run
+
+- Prompt version: extract_v1 · documents: 3 ok, 0 repaired, 0 failed (of 11 parsed)
+- Not finished? Yes. Gemini API returned HTTP 429 because the current quota was exceeded. 8 documents are pending.
+- Most common failure reason: Gemini API quota exceeded (HTTP 429). Wait for quota availability and resume using the same command.
+- A record that was valid but wrong: Not yet verified.
+- Cost at list price: Rs 0.1678 in total, approximately Rs 0.0559 per successfully extracted document.
+
+### D10 · Queue and worker
+
+- First run: **10** documents queued, finished in **— s**. Done **9**, skipped **—**, failed **1**
+- Pace: **— s per document** (INGEST_RPM = **12**, INGEST_CONCURRENCY = **2**)
+
+### Kill test
+
+- Queued: 20. At the kill: queued **—**, running **—**, done **—**, failed **—**
+- After the new worker: done **—** + skipped **—** + failed **—** = **—** (must be 20)
+- Documents in the database: **—**, different ids: **—** (must be equal)
+- The interrupted items came back after **— s**. Why that long: **—**
+- Why nothing was doubled (one sentence, in my own words): **—**
+
+### Dead-letter list
+
+| Stage (parse / extract / download / gave up) | Items | What I did |
+|---|---|---|
+| Extract / gave up | Item 8 | LLM rate limits (Gemini 503 and Groq 429) caused retries and a 60-second timeout |
+| — | Item 11 | Failed; exact reason still needs checking |
+
+### Live ingestion
+
+- RTI Mate on Render: **— of 5** documents done, **—** failed. The reasons: **—**
+- A request without the token gets status **—**
+
+### Week 2 against Monday's estimate
+
+- docs/CAPACITY.md said: **—** pages, **—** tokens. docs/INGEST_REPORT.md says: **—** pages, **—** tokens
+- The difference, and why: **—**
+
+### One thing that went wrong today, and how I fixed it
+
+Redis initially could not be reached by the ingestion queue. I corrected the local Redis URL to `redis://localhost:6379/0`, restarted the worker, and confirmed that jobs were processed. Later, Gemini returned HTTP 503 and Groq returned HTTP 429 rate-limit errors, causing retries and one timeout.
