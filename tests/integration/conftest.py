@@ -38,6 +38,15 @@ async def _admin(sql: str) -> None:
     await engine.dispose()
 
 
+async def _create_unmanaged_table(url: str) -> None:
+    engine = create_async_engine(to_asyncpg_url(url))
+    try:
+        async with engine.begin() as conn:
+            await conn.execute(text('CREATE TABLE "playing_with_neon" (id integer PRIMARY KEY)'))
+    finally:
+        await engine.dispose()
+
+
 @pytest.fixture(scope="session")
 def database_url():
     """Create test_xxxxxxxx, run the real migrations on it, drop it at the end."""
@@ -45,6 +54,7 @@ def database_url():
     asyncio.run(_admin(f'CREATE DATABASE "{name}"'))
     url = make_url(to_asyncpg_url(BASE_URL)).set(database=name)
     url_str = url.render_as_string(hide_password=False)
+    asyncio.run(_create_unmanaged_table(url_str))
     patch = pytest.MonkeyPatch()
     patch.setenv("APP_ENV", "ci")
     patch.setenv("DATABASE_URL", url_str)

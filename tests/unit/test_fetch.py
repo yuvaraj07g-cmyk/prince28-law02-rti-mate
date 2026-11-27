@@ -1,6 +1,8 @@
 """The downloader, tested without the internet: httpx.MockTransport plays the website."""
 
+import argparse
 import asyncio
+import importlib.util
 import json
 from pathlib import Path
 
@@ -9,6 +11,12 @@ import pytest
 
 from rti_mate.ingest import fetch
 from rti_mate.ingest.fetch import Source, fetch_all
+
+script_path = Path(__file__).resolve().parents[2] / "scripts" / "fetch.py"
+script_spec = importlib.util.spec_from_file_location("fetch_script", script_path)
+assert script_spec and script_spec.loader
+fetch_script = importlib.util.module_from_spec(script_spec)
+script_spec.loader.exec_module(fetch_script)
 
 SITE = "https://docs.example.org"
 
@@ -230,3 +238,63 @@ def test_a_source_without_a_licence_is_refused(tmp_path):
     path.write_text("url,source,licence,title\nhttps://example.org/a.pdf,example,,\n")
     with pytest.raises(ValueError, match="licence"):
         fetch.read_sources(path)
+
+
+def test_sitemap_command_adds_only_matching_urls_and_respects_the_limit(
+    tmp_path, monkeypatch, capsys
+):
+    monkeypatch.chdir(tmp_path)
+    sources_path = tmp_path / "data" / "sources.csv"
+    monkeypatch.setattr(fetch_script, "SOURCES", sources_path)
+    pages = [
+        "https://docs.example.org/docs/start",
+        "https://docs.example.org/docs/old",
+        "https://docs.example.org/blog/post",
+        "https://docs.example.org/docs/next",
+    ]
+    monkeypatch.setattr(fetch_script, "sitemap_urls", lambda client, url: pages)
+    args = argparse.Namespace(
+        url="https://docs.example.org/sitemap.xml",
+        include=["/docs/"],
+        exclude=["old"],
+        limit=1,
+        source="example",
+        licence="CC BY 4.0",
+    )
+
+    assert fetch_script.cmd_sitemap(args) == 0
+    assert "sitemap_urls=4 matched=2 added_to_sources=1" in capsys.readouterr().out
+    assert fetch.read_sources(sources_path)[0].url == pages[0]
+
+    assert fetch_script.cmd_sitemap(args) == 0
+    assert "added_to_sources=1" in capsys.readouterr().out
+    assert [source.url for source in fetch.read_sources(sources_path)] == [pages[0], pages[3]]
+
+
+def test_manual_command_registers_new_files_only(tmp_path, monkeypatch, capsys):
+    monkeypatch.chdir(tmp_path)
+    folder = tmp_path / "data" / "raw" / "example"
+    folder.mkdir(parents=True)
+    (folder / "first.pdf").write_bytes(b"first")
+    manifest_path = tmp_path / "data" / "manifest.jsonl"
+    monkeypatch.setattr(fetch_script, "RAW", Path("data/raw"))
+    monkeypatch.setattr(fetch_script, "MANIFEST", manifest_path)
+    args = argparse.Namespace(
+        folder=Path("data/raw/example"),
+        from_url="https://example.org/downloads",
+        source="example",
+        licence="CC BY 4.0",
+    )
+
+    assert fetch_script.cmd_manual(args) == 0
+    assert "added=1" in capsys.readouterr().out
+    record = json.loads(manifest_path.read_text(encoding="utf-8").splitlines()[0])
+    assert record["via"] == "manual" and record["sha256"]
+    assert record["path"] == "data/raw/example/first.pdf"
+
+    (folder / "second.pdf").write_bytes(b"second")
+    assert fetch_script.cmd_manual(args) == 0
+    assert "added=1" in capsys.readouterr().out
+    assert fetch_script.cmd_manual(args) == 0
+    assert "added=0" in capsys.readouterr().out
+    assert len(manifest_path.read_text(encoding="utf-8").splitlines()) == 2

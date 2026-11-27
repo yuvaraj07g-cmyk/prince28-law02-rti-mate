@@ -10,6 +10,7 @@ from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
+=======
 
 # revision identifiers, used by Alembic.
 revision: str = 'a6e9582e19f6'  # pragma: allowlist secret
@@ -43,6 +44,7 @@ def upgrade() -> None:
     op.drop_index(op.f('ix_parse_failures_reason'), table_name='parse_failures')
     op.drop_table('parse_failures')
     op.drop_column('pages', 'headings')
+=======
     # ### end Alembic commands ###
 
 
@@ -64,6 +66,7 @@ def downgrade() -> None:
     sa.UniqueConstraint('path', name=op.f('uq_parse_failures_path'), postgresql_include=[], postgresql_nulls_not_distinct=False)
     )
     op.create_index(op.f('ix_parse_failures_reason'), 'parse_failures', ['reason'], unique=False)
+=======
     op.drop_index(op.f('ix_llm_calls_request_id'), table_name='llm_calls')
     op.drop_index(op.f('ix_llm_calls_created_at'), table_name='llm_calls')
     op.drop_table('llm_calls')

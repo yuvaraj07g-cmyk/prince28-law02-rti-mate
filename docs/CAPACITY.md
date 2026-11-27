@@ -3,16 +3,16 @@
 Full corpus target: + 1,000+ CIC decisions (8,000+ pages)
 
 <!-- generated:start -->
-## Measured on my start corpus (2026-11-23 16:14 UTC)
+## Measured on my start corpus (2026-11-24 05:59 UTC)
 
 | What | Value |
 |---|---|
-| Files | 13 |
+| Files | 16 |
 | Size on disk | 11.4 MB |
-| Pages (PDF pages + 1 per 3,000 characters of text/HTML) | 397 |
-| Characters of text | 687,668 |
-| Estimated tokens (characters / 4) | 171,917 |
-| Tokens per page | 433 |
+| Pages (PDF pages + 1 per 3,000 characters of text/HTML) | 399 |
+| Characters of text | 692,895 |
+| Estimated tokens (characters / 4) | 173,224 |
+| Tokens per page | 434 |
 | PDFs with almost no text (scanned? OCR is Day 7) | 1 |
 | Files not measured (zip, xlsx, unreadable) | 0 |
 
@@ -20,10 +20,10 @@ Full corpus target: + 1,000+ CIC decisions (8,000+ pages)
 
 | What | How | Value |
 |---|---|---|
-| Scale factor | target / measured | x 20.2 |
-| Tokens | measured tokens x scale | 3.46 M |
-| Raw files | measured MB x scale | 229 MB |
-| Chunks | tokens / 400 x 1.15 overlap | 9,960 |
+| Scale factor | target / measured | x 20.1 |
+| Tokens | measured tokens x scale | 3.48 M |
+| Raw files | measured MB x scale | 228 MB |
+| Chunks | tokens / 400 x 1.15 overlap | 9,992 |
 | Embedding cost, one time | tokens x 1.15 x $0.15 per 1M | $0.60 = Rs 57 |
 | Vector storage | chunks x 768 numbers x 4 bytes | 31 MB |
 | Text in Postgres | characters x scale x 1.2 | 17 MB |
