@@ -1,10 +1,8 @@
-
 """add llm_calls
 
 Revision ID: a6e9582e19f6
 Revises: 002
 Create Date: 2026-11-25 15:34:15.578375
-
 """
 
 from typing import Sequence, Union
@@ -14,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "a6e9582e19f6"  # pragma: allowlist secret
+revision: str = "a6e9582e19f6"
 down_revision: Union[str, Sequence[str], None] = "002"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -82,6 +80,12 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     """Downgrade schema."""
-    op.drop_index(op.f("ix_llm_calls_request_id"), table_name="llm_calls")
-    op.drop_index(op.f("ix_llm_calls_created_at"), table_name="llm_calls")
+    op.drop_index(
+        op.f("ix_llm_calls_request_id"),
+        table_name="llm_calls",
+    )
+    op.drop_index(
+        op.f("ix_llm_calls_created_at"),
+        table_name="llm_calls",
+    )
     op.drop_table("llm_calls")

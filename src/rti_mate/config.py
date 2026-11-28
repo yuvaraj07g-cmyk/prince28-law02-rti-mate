@@ -39,6 +39,15 @@ class Settings(BaseSettings):
     llm_timeout_seconds: float = 30.0
     usd_inr: float = 95.0  # rupees per US dollar, for cost estimates
     prompts_dir: Path = Path("prompts")
+    # Queue and worker (Day 10). One Redis; the worker is a second process running the same code.
+    redis_url: str = "redis://localhost:6379"
+    manifest_file: Path = Path("data/manifest.jsonl")
+    admin_token: str = ""  # whoever sends this in X-Admin-Token may start an ingestion
+    worker_in_api: bool = False  # True where no separate worker service exists (free hosting)
+    ingest_concurrency: int = 2  # documents a worker handles at the same time
+    ingest_rpm: float = 12.0  # model calls per minute, shared by those documents
+    ingest_job_timeout: int = 60  # seconds; a longer job is stopped and tried again
+    ingest_max_tries: int = 3
 
 
 @lru_cache

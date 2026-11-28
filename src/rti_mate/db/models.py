@@ -78,6 +78,7 @@ class Page(Base):
     )
     page_no: Mapped[int]
     text: Mapped[str] = mapped_column(Text)
+
     # The section path this page starts in, e.g. ["Fever", "Dengue"]: used for citations.
     headings: Mapped[list[str]] = mapped_column(JSONB, server_default="[]")
 
@@ -86,6 +87,24 @@ class Page(Base):
     __table_args__ = (
         UniqueConstraint("document_id", "page_no", name="uq_pages_document_page"),
         CheckConstraint("page_no >= 1", name="page_no_positive"),
+    )
+
+
+class ParseFailure(Base):
+    """One raw file that could not be parsed, with the reason and retry count."""
+
+    __tablename__ = "parse_failures"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    path: Mapped[str] = mapped_column(Text, unique=True)
+    sha256: Mapped[str] = mapped_column(String(64))
+    source_url: Mapped[str | None] = mapped_column(Text)
+    reason: Mapped[str] = mapped_column(String(40), index=True)
+    detail: Mapped[str] = mapped_column(Text, server_default="")
+    attempts: Mapped[int] = mapped_column(server_default="1")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
 
@@ -112,19 +131,36 @@ class LlmCall(Base):
     )
 
 
-class ParseFailure(Base):
-    """The dead-letter table: one row per raw file we could not parse, with the reason."""
+class IngestJob(Base):
+    """One request to ingest a batch of documents. Its items carry the real state."""
 
-    __tablename__ = "parse_failures"
+    __tablename__ = "ingest_jobs"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    requested: Mapped[int]
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    items: Mapped[list["IngestItem"]] = relationship(
+        back_populates="job", cascade="all, delete-orphan"
+    )
+
+
+class IngestItem(Base):
+    """One document in a batch: queued -> running -> done / skipped / failed."""
+
+    __tablename__ = "ingest_items"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    path: Mapped[str] = mapped_column(Text, unique=True)  # data/raw/<source>/<file>
-    sha256: Mapped[str] = mapped_column(String(64))
-    source_url: Mapped[str | None] = mapped_column(Text)
-    reason: Mapped[str] = mapped_column(String(40), index=True)  # no_text_layer, corrupt, ...
-    detail: Mapped[str] = mapped_column(Text, server_default="")
-    attempts: Mapped[int] = mapped_column(server_default="1")
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    job_id: Mapped[str] = mapped_column(
+        ForeignKey("ingest_jobs.id", ondelete="CASCADE"), index=True
+    )
+    record: Mapped[dict[str, Any]] = mapped_column(JSONB)
+    status: Mapped[str] = mapped_column(String(10), server_default="queued", index=True)
+    attempts: Mapped[int] = mapped_column(server_default="0")
+    error: Mapped[str] = mapped_column(Text, server_default="")
+    pages: Mapped[int] = mapped_column(server_default="0")
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+
+    job: Mapped[IngestJob] = relationship(back_populates="items")
