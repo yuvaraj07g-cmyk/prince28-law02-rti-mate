@@ -137,9 +137,29 @@ Live API smoke test passed.
 - Rolled forward to SHA: f6e5d4c3b2a1
 - Roll-forward duration: 6 minutes
 
-**Why is rollback safe here?**
+### 4. Rollback Drill
 
-The rollback changes the application image without reversing database migrations. It is safe only because the older application remains compatible with the newer database schema.
+- Status: **Completed successfully**
+- Previous known-good SHA: `02ea9eca378c9ffd8559ecf8247b487bd3883cb0`
+- Current production SHA: `7ca68f8cfc2e219705f74a75f832cb0899edb2fc`
+- Rollback workflow: CD #19
+- Rollback smoke test: Passed
+- Roll-forward workflow: CD #20
+- Roll-forward smoke test: Passed
+
+**Rollback verification:**
+- `/health` → HTTP 200, old version `02ea9eca`
+- `/ready` → HTTP 200, database connected
+- `/v1/documents?limit=1` → HTTP 200
+
+**Roll-forward verification:**
+- `/health` → HTTP 200, restored version `7ca68f8`
+- `/ready` → HTTP 200, database connected
+- `/v1/documents?limit=1` → HTTP 200
+
+**Why was rollback safe?**
+
+The rollback changed the application image without reversing database migrations. The older application remained compatible with the newer database schema. After verification, I deployed the latest application image again.
 
 ### 5. Secrets Configuration
 
@@ -158,6 +178,21 @@ No secret values should be stored in Git or inside the Docker image.
 - Current status: 502 Bad Gateway in North America.
 
 **One improvement for faster first requests:** Use an always-on hosting service or paid plan to avoid cold starts.
+### 7. Production Smoke Test
+
+- Live URL: https://rti-mate.onrender.com
+- Deployed commit: 7ca68f8cfc2e219705f74a75f832cb0899edb2fc
+
+```text
+GET /health → HTTP 200
+Version: 7ca68f8cfc2e219705f74a75f832cb0899edb2fc
+
+GET /ready → HTTP 200
+Database: true
+
+GET /v1/documents?limit=1 → HTTP 200
+
+Smoke test passed.
 
 ## D06 · Collecting the corpus
 
